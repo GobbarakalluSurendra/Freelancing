@@ -8,15 +8,21 @@ import Portfolio from './pages/Portfolio';
 import Contact from './pages/Contact';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
+import ReviewPage from './pages/ReviewPage';
+import ReviewsPage from './pages/ReviewsPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
 import BackToTop from './components/BackToTop';
+import ScrollToTop from './components/ScrollToTop';
 
 function App() {
   return (
     <AuthProvider>
       <Router>
         <div className="flex flex-col min-h-screen">
+          <ScrollToTop />
           <Navbar />
           <main className="flex-grow">
             <Routes>
@@ -25,7 +31,11 @@ function App() {
               <Route path="/services" element={<Services />} />
               <Route path="/portfolio" element={<Portfolio />} />
               <Route path="/contact" element={<Contact />} />
+              <Route path="/reviews" element={<ReviewsPage />} />
+              <Route path="/review" element={<ReviewPage />} />
               <Route path="/admin" element={<AdminLogin />} />
+              <Route path="/admin/forgot-password" element={<ForgotPassword />} />
+              <Route path="/admin/reset-password/:token" element={<ResetPassword />} />
               <Route 
                 path="/admin/dashboard" 
                 element={

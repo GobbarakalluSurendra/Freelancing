@@ -8,7 +8,7 @@ const skills = [
   { name: 'React.js', level: 92, color: 'from-cyan-400 to-blue-500' },
   { name: 'Node.js & Express', level: 88, color: 'from-green-400 to-emerald-500' },
   { name: 'MongoDB', level: 85, color: 'from-green-400 to-teal-500' },
-  { name: 'TypeScript', level: 80, color: 'from-blue-400 to-indigo-500' },
+  { name: 'JavaScript', level: 80, color: 'from-blue-400 to-indigo-500' },
   { name: 'Next.js', level: 78, color: 'from-slate-300 to-slate-500' },
   { name: 'Tailwind CSS', level: 95, color: 'from-cyan-400 to-sky-500' },
   { name: 'PostgreSQL', level: 72, color: 'from-blue-400 to-blue-600' },

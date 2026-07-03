@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
 import { motion } from 'framer-motion';
-import { LogOut, Plus, Trash2, Star, Briefcase, MessageSquare, Award, Wrench } from 'lucide-react';
+import { LogOut, Plus, Trash2, Star, Briefcase, MessageSquare, Award, Wrench, Pencil, X } from 'lucide-react';
 
 const CATEGORIES = ['Full Stack', 'Frontend', 'Backend', 'Design', 'Other'];
 
@@ -60,23 +60,20 @@ const AdminDashboard = () => {
   // Services State
   const [services, setServices] = useState([]);
   const [showAddService, setShowAddService] = useState(false);
+  const [editingService, setEditingService] = useState(null); // holds service being edited
   const [serviceForm, setServiceForm] = useState({
     title: '', description: '', icon: 'Monitor', price: '',
   });
 
-  // Setup Axios interceptor to include token
+  // Set auth header and load all data
   useEffect(() => {
-    if (admin) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${admin.token}`;
-    }
-  }, [admin]);
-
-  useEffect(() => {
+    if (!admin?.token) return;
+    axios.defaults.headers.common['Authorization'] = `Bearer ${admin.token}`;
     fetchProjects();
     fetchMessages();
     fetchTestimonials();
     fetchServices();
-  }, []);
+  }, [admin]);
 
   const fetchProjects = async () => {
     try {
@@ -98,12 +95,24 @@ const AdminDashboard = () => {
 
   const fetchTestimonials = async () => {
     try {
-      const { data } = await axios.get('/api/testimonials');
+      const { data } = await axios.get('/api/testimonials/all');
       setTestimonials(data);
     } catch (error) {
-      console.error(error);
+      console.error('fetchTestimonials error:', error);
     }
   };
+
+  const approveTestimonial = async (id) => {
+    try {
+      await axios.put(`/api/testimonials/${id}/approve`, {}, {
+        headers: { Authorization: `Bearer ${admin?.token}` },
+      });
+      fetchTestimonials();
+    } catch (error) {
+      console.error('approveTestimonial error:', error.response?.status, error.response?.data);
+    }
+  };
+
 
   const handleProjectSubmit = async (e) => {
     e.preventDefault();
@@ -178,14 +187,38 @@ const AdminDashboard = () => {
   const handleServiceSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('/api/services', serviceForm);
-      setShowAddService(false);
+      if (editingService) {
+        // UPDATE existing service
+        await axios.put(`/api/services/${editingService._id}`, serviceForm);
+        setEditingService(null);
+      } else {
+        // CREATE new service
+        await axios.post('/api/services', serviceForm);
+        setShowAddService(false);
+      }
       setServiceForm({ title: '', description: '', icon: 'Monitor', price: '' });
       fetchServices();
     } catch (error) {
       console.error(error);
       alert('Error saving service');
     }
+  };
+
+  const editService = (service) => {
+    setEditingService(service);
+    setServiceForm({
+      title: service.title,
+      description: service.description,
+      icon: service.icon,
+      price: service.price,
+    });
+    setShowAddService(false); // close add form if open
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const cancelEdit = () => {
+    setEditingService(null);
+    setServiceForm({ title: '', description: '', icon: 'Monitor', price: '' });
   };
 
   const deleteService = async (id) => {
@@ -359,7 +392,58 @@ const AdminDashboard = () => {
               </button>
             </div>
 
-            {showAddService && (
+            {/* Edit Form (shows when editing a service) */}
+            {editingService && (
+              <div className="glass-card p-6 mb-8 border border-primary-500/30">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-white font-semibold text-lg">✏️ Editing: <span className="text-primary-400">{editingService.title}</span></h3>
+                  <button onClick={cancelEdit} className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-colors">
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+                <form onSubmit={handleServiceSubmit} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm text-slate-300 mb-1">Title</label>
+                      <input required type="text" className="input-field" value={serviceForm.title} onChange={(e) => setServiceForm({ ...serviceForm, title: e.target.value })} />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-slate-300 mb-1">Price Info</label>
+                      <input required type="text" className="input-field" value={serviceForm.price} onChange={(e) => setServiceForm({ ...serviceForm, price: e.target.value })} />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-slate-300 mb-1">Icon</label>
+                      <select className="input-field" value={serviceForm.icon} onChange={(e) => setServiceForm({ ...serviceForm, icon: e.target.value })}>
+                        <option value="Monitor">Monitor (Frontend)</option>
+                        <option value="Server">Server (Backend)</option>
+                        <option value="Database">Database (DB Design)</option>
+                        <option value="Smartphone">Smartphone (Mobile/Fullstack)</option>
+                        <option value="PenTool">PenTool (UI/UX Design)</option>
+                        <option value="Search">Search (SEO)</option>
+                        <option value="Code">Code (General Dev)</option>
+                        <option value="Globe">Globe (Websites)</option>
+                        <option value="Layers">Layers (Full Stack)</option>
+                        <option value="Cpu">Cpu (Optimizations)</option>
+                        <option value="Settings">Settings (Config)</option>
+                        <option value="Shield">Shield (Security)</option>
+                        <option value="Cloud">Cloud (Deployment)</option>
+                      </select>
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm text-slate-300 mb-1">Description</label>
+                      <textarea required className="input-field h-24 resize-none" value={serviceForm.description} onChange={(e) => setServiceForm({ ...serviceForm, description: e.target.value })} />
+                    </div>
+                  </div>
+                  <div className="flex gap-3">
+                    <button type="submit" className="btn-primary flex-1">💾 Save Changes</button>
+                    <button type="button" onClick={cancelEdit} className="px-6 py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors">Cancel</button>
+                  </div>
+                </form>
+              </div>
+            )}
+
+            {/* Add Form */}
+            {showAddService && !editingService && (
               <div className="glass-card p-6 mb-8">
                 <form onSubmit={handleServiceSubmit} className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -398,14 +482,18 @@ const AdminDashboard = () => {
                       <textarea required className="input-field h-24 resize-none" value={serviceForm.description} onChange={(e) => setServiceForm({ ...serviceForm, description: e.target.value })} placeholder="Describe the service details..."></textarea>
                     </div>
                   </div>
-                  <button type="submit" className="btn-primary w-full">Save Service</button>
+                  <div className="flex gap-2">
+                    <button type="submit" className="btn-primary w-full">Save Service</button>
+                  </div>
                 </form>
               </div>
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {services.map((service) => (
-                <div key={service._id} className="glass-card p-6 flex flex-col justify-between">
+                <div key={service._id} className={`glass-card p-6 flex flex-col justify-between transition-all duration-200 ${
+                  editingService?._id === service._id ? 'border border-primary-500/50 ring-1 ring-primary-500/20' : ''
+                }`}>
                   <div>
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center space-x-3">
@@ -413,9 +501,18 @@ const AdminDashboard = () => {
                           {service.icon}
                         </span>
                       </div>
-                      <button onClick={() => deleteService(service._id)} className="p-2 text-red-400 hover:bg-red-500/10 rounded">
-                        <Trash2 className="h-5 w-5" />
-                      </button>
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => editService(service)}
+                          className="p-2 text-primary-400 hover:bg-primary-500/10 rounded transition-colors"
+                          title="Edit service"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </button>
+                        <button onClick={() => deleteService(service._id)} className="p-2 text-red-400 hover:bg-red-500/10 rounded transition-colors" title="Delete service">
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
                     <h3 className="text-lg font-bold text-white mb-2">{service.title}</h3>
                     <p className="text-slate-400 text-sm mb-4 line-clamp-3">{service.description}</p>
@@ -476,20 +573,37 @@ const AdminDashboard = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {testimonials.map((t) => (
-                <div key={t._id} className="glass-card p-6">
+                <div key={t._id} className={`glass-card p-6 border ${t.approved ? 'border-slate-700/50' : 'border-amber-500/30 bg-amber-500/5'}`}>
                   <div className="flex justify-between items-start mb-3">
                     <div className="flex items-center space-x-3">
                       <div className="w-10 h-10 rounded-full bg-primary-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                         {t.avatarInitials || t.name.slice(0, 2).toUpperCase()}
                       </div>
                       <div>
-                        <p className="text-white font-semibold">{t.name}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-white font-semibold">{t.name}</p>
+                          {!t.approved && (
+                            <span className="text-xs px-2 py-0.5 bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-full font-medium">
+                              Pending
+                            </span>
+                          )}
+                        </div>
                         <p className="text-slate-400 text-sm">{t.role}{t.company ? ` @ ${t.company}` : ''}</p>
                       </div>
                     </div>
-                    <button onClick={() => deleteTestimonial(t._id)} className="p-2 text-red-400 hover:bg-red-500/10 rounded flex-shrink-0">
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      {!t.approved && (
+                        <button
+                          onClick={() => approveTestimonial(t._id)}
+                          className="px-3 py-1 text-xs font-semibold bg-accent-500/20 hover:bg-accent-500/30 text-accent-400 border border-accent-500/30 rounded-lg transition-colors"
+                        >
+                          ✓ Approve
+                        </button>
+                      )}
+                      <button onClick={() => deleteTestimonial(t._id)} className="p-2 text-red-400 hover:bg-red-500/10 rounded flex-shrink-0">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
                   <div className="flex space-x-1 mb-3">
                     {[1,2,3,4,5].map((s) => (

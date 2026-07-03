@@ -32,6 +32,10 @@ const testimonialSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    approved: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

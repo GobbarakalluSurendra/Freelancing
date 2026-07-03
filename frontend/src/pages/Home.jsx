@@ -57,59 +57,52 @@ const StarRating = ({ rating }) => (
   </div>
 );
 
+const portfolioProjects = [
+  {
+    _id: '1',
+    number: '01',
+    title: 'Attendance Management System',
+    description: 'A student attendance tracking system built with Flutter, PHP, and MySQL.',
+    col2Image: 'https://surendrag.netlify.app/AMS.png',
+    techStack: ['Flutter', 'PHP', 'MySQL'],
+    liveLink: 'https://edutrack.infinityfreeapp.com/edutrack/index.php',
+    githubLink: 'https://github.com/GobbarakalluSurendra/AMS',
+  },
+  {
+    _id: '2',
+    number: '02',
+    title: 'Brillon Website',
+    description: 'A modern corporate website developed during my internship at Brillon AI Technologies.',
+    col2Image: 'https://surendrag.netlify.app/Brillon.png',
+    techStack: ['React', 'CSS', 'Frontend'],
+    liveLink: 'https://brillon.netlify.app/',
+    githubLink: 'https://github.com/GobbarakalluSurendra/Brillon_Webiste/tree/Fourth_Version',
+  },
+];
+
 const Home = () => {
   const [testimonials, setTestimonials] = useState([]);
-  const [projects, setProjects] = useState([
-    {
-      _id: '1',
-      title: 'NLP Virtual Lab',
-      description: 'An interactive virtual laboratory for Natural Language Processing experiments and educational purposes.',
-      imageUrl: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=800&auto=format&fit=crop',
-      techStack: ['Python', 'React', 'Flask', 'NLP'],
-      liveLink: ' https://nlp-virtual-lab1.vercel.app/',
-      githubLink: 'https://github.com/GobbarakalluSurendra/NLP-Virtual-Lab'
-    },
-    {
-      _id: '2',
-      title: 'Attendance Management System (AMS)',
-      description: 'A robust web-based Attendance Management System built with PHP and MySQL supporting Admin, Teacher, and Student roles.',
-      imageUrl: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-      techStack: ['PHP', 'MySQL', 'CSS'],
-      liveLink: '',
-      githubLink: 'https://github.com/GobbarakalluSurendra/AMS'
-    }
-  ]);
 
   useEffect(() => {
     const fetchTestimonials = async () => {
       try {
         const { data } = await axios.get('/api/testimonials');
-        setTestimonials(data);
+        // Sort by highest rating and show only top 2
+        const top2 = [...data]
+          .sort((a, b) => b.rating - a.rating)
+          .slice(0, 2);
+        setTestimonials(top2);
       } catch (error) {
         console.error('Error fetching testimonials:', error);
       }
     };
-
-    const fetchProjects = async () => {
-      try {
-        const { data } = await axios.get('/api/projects');
-        if (data && data.length > 0) {
-          setProjects(data.slice(0, 2)); // Get top 2 projects
-        }
-      } catch (error) {
-        console.error('Error fetching projects:', error);
-      }
-    };
-
     fetchTestimonials();
-    // fetchProjects(); // Commented out to use the hardcoded GitHub projects
   }, []);
 
   return (
     <div className="pt-20">
       {/* Hero Section */}
       <section className="relative min-h-[90vh] flex flex-col justify-center overflow-hidden pt-32 pb-16">
-        {/* Background Decorative Elements */}
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary-500/20 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob"></div>
         <div className="absolute top-0 right-1/4 w-96 h-96 bg-accent-500/20 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob animation-delay-2000"></div>
         <div className="absolute -bottom-32 left-1/2 w-96 h-96 bg-blue-600/20 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob animation-delay-4000"></div>
@@ -139,9 +132,9 @@ const Home = () => {
                 Hire Me
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Link>
-              <Link to="/portfolio" className="btn-outline w-full sm:w-auto text-lg px-8 py-4">
+              <a href="https://surendrag.netlify.app/" target="_blank" rel="noopener noreferrer" className="btn-outline w-full sm:w-auto text-lg px-8 py-4">
                 View My Work
-              </Link>
+              </a>
             </motion.div>
           </motion.div>
         </div>
@@ -190,7 +183,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Tech Stack Marquee Section */}
+      {/* Tech Stack Marquee */}
       <section className="py-12 bg-dark-900 border-y border-slate-800 relative z-10 overflow-hidden flex items-center">
         <div className="flex w-max animate-marquee space-x-16 opacity-70 hover:opacity-100 hover:pause transition-opacity duration-300 py-4">
           {[...Array(4)].map((_, i) => (
@@ -215,7 +208,6 @@ const Home = () => {
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Why Choose Me?</h2>
             <p className="text-slate-400 max-w-2xl mx-auto text-lg">Delivering value through expertise, innovation, and dedication.</p>
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {features.map((feature, index) => (
               <motion.div
@@ -238,72 +230,111 @@ const Home = () => {
       </section>
 
       {/* Recent Projects Section */}
-      {projects.length > 0 && (
-        <section className="py-24 relative z-10 bg-dark-900/30">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-end mb-16">
-              <div>
-                <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                  Recent <span className="text-primary-500">Projects</span>
-                </h2>
-                <p className="text-slate-400 text-lg">A glimpse into my latest work.</p>
-              </div>
-              <Link to="/portfolio" className="hidden md:flex items-center text-primary-400 hover:text-primary-300 font-medium transition-colors">
-                View All Projects <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
+      <section className="py-24 relative z-10 bg-dark-900/30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-end mb-16">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                Recent <span className="text-primary-500">Projects</span>
+              </h2>
+              <p className="text-slate-400 text-lg">A glimpse into my latest work.</p>
             </div>
+            <a
+              href="https://surendrag.netlify.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden md:flex items-center text-primary-400 hover:text-primary-300 font-medium transition-colors"
+            >
+              View All Projects <ArrowRight className="ml-2 h-4 w-4" />
+            </a>
+          </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-              {projects.map((project, index) => (
-                <motion.div
-                  key={project._id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  className="glass-card overflow-hidden group flex flex-col"
-                >
-                  <div className="relative h-64 overflow-hidden bg-dark-900">
+          <div className="grid grid-cols-1 gap-10">
+            {portfolioProjects.map((project, index) => (
+              <motion.div
+                key={project._id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.15 }}
+                className="glass-card overflow-hidden group"
+              >
+                <div className={`flex flex-col md:flex-row ${index % 2 === 1 ? 'md:flex-row-reverse' : ''}`}>
+
+                  {/* ── Single Image ── */}
+                  <div className="md:w-1/2 flex-shrink-0 h-72 md:h-80 overflow-hidden bg-dark-900 relative">
                     <img
-                      src={project.imageUrl || 'https://via.placeholder.com/600x400?text=Project+Image'}
+                      src={project.col2Image}
                       alt={project.title}
-                      className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                      className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
                     />
-                    <div className="absolute inset-0 bg-dark-900/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center space-x-4 backdrop-blur-sm">
-                      {project.liveLink && (
-                        <a href={project.liveLink} target="_blank" rel="noopener noreferrer" className="p-3 bg-primary-500 text-white rounded-full hover:bg-primary-600 transition-colors">
-                          <ExternalLink className="h-6 w-6" />
-                        </a>
-                      )}
-                      {project.githubLink && (
-                        <a href={project.githubLink} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-800 text-white rounded-full hover:bg-slate-700 transition-colors">
-                          <FaGithub className="h-6 w-6" />
-                        </a>
-                      )}
-                    </div>
                   </div>
-                  <div className="p-8 flex-grow flex flex-col">
-                    <h3 className="text-2xl font-bold text-white mb-3">{project.title}</h3>
-                    <p className="text-slate-400 mb-6 flex-grow">{project.description}</p>
-                    <div className="flex flex-wrap gap-2 mt-auto">
-                      {project.techStack?.slice(0, 4).map((tech, i) => (
-                        <span key={i} className="px-3 py-1 bg-dark-900 text-primary-400 text-xs font-medium rounded-full border border-slate-700">
+
+                  {/* ── Project Info ── */}
+                  <div className="md:w-1/2 p-8 md:p-12 flex flex-col justify-center gap-6">
+                    <div className="flex flex-wrap gap-2">
+                      {project.techStack.map((tech, i) => (
+                        <span
+                          key={i}
+                          className="px-3 py-1 bg-primary-500/10 text-primary-400 text-xs font-semibold rounded-full border border-primary-500/20"
+                        >
                           {tech}
                         </span>
                       ))}
                     </div>
+
+                    <div>
+                      <h3 className="text-2xl md:text-3xl font-bold text-white mb-3 leading-tight">
+                        {project.title}
+                      </h3>
+                      <p className="text-slate-400 text-base leading-relaxed">
+                        {project.description}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                      {project.liveLink && (
+                        <a
+                          href={project.liveLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-500 hover:bg-primary-600 text-white text-sm font-semibold rounded-lg transition-all duration-200 hover:-translate-y-0.5 shadow-lg shadow-primary-500/25"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                          Live Demo
+                        </a>
+                      )}
+                      {project.githubLink && (
+                        <a
+                          href={project.githubLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-white text-sm font-semibold rounded-lg border border-slate-700 hover:border-slate-500 transition-all duration-200 hover:-translate-y-0.5"
+                        >
+                          <FaGithub className="h-4 w-4" />
+                          GitHub
+                        </a>
+                      )}
+                    </div>
                   </div>
-                </motion.div>
-              ))}
-            </div>
-            <div className="mt-10 text-center md:hidden">
-              <Link to="/portfolio" className="btn-outline inline-flex items-center">
-                View All Projects <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </div>
+
+                </div>
+              </motion.div>
+            ))}
           </div>
-        </section>
-      )}
+
+          <div className="mt-10 text-center md:hidden">
+            <a
+              href="https://surendrag.netlify.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-outline inline-flex items-center"
+            >
+              View All Projects <ArrowRight className="ml-2 h-4 w-4" />
+            </a>
+          </div>
+        </div>
+      </section>
 
       {/* Testimonials Section */}
       {testimonials.length > 0 && (
@@ -335,15 +366,11 @@ const Home = () => {
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                   className="glass-card p-8 flex flex-col hover:-translate-y-1 transition-transform duration-300 relative"
                 >
-                  {/* Quote icon */}
                   <Quote className="absolute top-6 right-6 h-8 w-8 text-primary-500/20" />
-
                   <StarRating rating={testimonial.rating} />
-
                   <p className="text-slate-300 leading-relaxed mt-4 mb-6 flex-grow italic">
                     "{testimonial.message}"
                   </p>
-
                   <div className="flex items-center space-x-4 mt-auto border-t border-slate-700/50 pt-6">
                     <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0 ${AVATAR_COLORS[index % AVATAR_COLORS.length]}`}>
                       {testimonial.avatarInitials || testimonial.name.slice(0, 2).toUpperCase()}
@@ -358,6 +385,23 @@ const Home = () => {
                 </motion.div>
               ))}
             </div>
+
+            {/* See All Reviews CTA */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: 0.2 }}
+              className="text-center mt-12"
+            >
+              <Link
+                to="/reviews"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-primary-500/50 text-slate-300 hover:text-white font-semibold rounded-lg transition-all duration-200 hover:-translate-y-0.5"
+              >
+                See All Reviews
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </motion.div>
           </div>
         </section>
       )}

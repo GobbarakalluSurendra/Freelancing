@@ -1,5 +1,5 @@
 import { useState, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { Lock, Mail } from 'lucide-react';
 
@@ -89,6 +89,15 @@ const AdminLogin = () => {
             >
               {loading ? 'Authenticating...' : 'Sign In'}
             </button>
+
+            <div className="text-center">
+              <Link
+                to="/admin/forgot-password"
+                className="text-sm text-slate-400 hover:text-primary-400 transition-colors"
+              >
+                Forgot password?
+              </Link>
+            </div>
           </form>
         </div>
       </div>
