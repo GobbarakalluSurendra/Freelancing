@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import profileImg from '../assets/profile.png';
+import profileImg from '../assets/photo.jpg';
 import resumePdf from '../assets/SurendraResume.pdf';
 import { motion, useInView, useAnimation } from 'framer-motion';
 import { Download, Briefcase, Users, Code, GraduationCap, Target, Lightbulb, MonitorSmartphone, CheckCircle2 } from 'lucide-react';
