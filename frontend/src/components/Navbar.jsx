@@ -26,7 +26,8 @@ const Navbar = () => {
     { name: 'Home', path: '/' },
     { name: 'About', path: '/about' },
     { name: 'Services', path: '/services' },
-   {name: 'Portfolio',   path: 'https://surendrag.netlify.app/' },
+    { name: 'Portfolio', path: 'https://surendrag.netlify.app/' },
+    { name: 'Reviews', path: '/reviews' },
     { name: 'Contact', path: '/contact' },
   ];
 
